@@ -1,4 +1,7 @@
-﻿namespace AuthLibrary.Models.Response
+﻿using System;
+using System.Collections.Generic;
+
+namespace AuthLibrary.Models.Response
 {
     public class UserPermissionsResponse
     {

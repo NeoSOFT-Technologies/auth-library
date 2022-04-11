@@ -1,5 +1,6 @@
 ﻿using AuthLibrary.Models.Request;
 using AuthLibrary.Models.Response;
+using System.Threading.Tasks;
 
 namespace AuthLibrary.IServices
 {

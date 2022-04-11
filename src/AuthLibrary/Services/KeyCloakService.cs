@@ -8,6 +8,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Net.Http;
 
 namespace AuthLibrary.Services
 {

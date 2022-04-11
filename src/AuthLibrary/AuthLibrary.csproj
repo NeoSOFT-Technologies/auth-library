@@ -1,16 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>disable</Nullable>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PackageId>Neosoft.Technologies.AuthLibrary</PackageId>
+    <Version>1.1.0</Version>
+    <Authors>Neosoft Technologies</Authors>
   </PropertyGroup>
-
+	
   <ItemGroup>
-	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
-	  <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.23" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.23" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.23" />
+	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.23" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
 </Project>
