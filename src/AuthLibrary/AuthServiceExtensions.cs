@@ -3,7 +3,7 @@ using AuthLibrary.Models.Settings;
 using AuthLibrary.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace AuthLibrary
@@ -22,7 +22,7 @@ namespace AuthLibrary
                         string aggrErrors = string.Join(",", configErrors);
                         int count = configErrors.Length;
                         string configType = settings.GetType().Name;
-                        throw new ApplicationException(
+                        throw new ValidationException(
                             $"Found {count} configuration error(s) in {configType}: {aggrErrors}");
                     }
                 });
