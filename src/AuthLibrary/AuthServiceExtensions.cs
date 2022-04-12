@@ -3,6 +3,8 @@ using AuthLibrary.Models.Settings;
 using AuthLibrary.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Linq;
 
 namespace AuthLibrary
 {
@@ -10,7 +12,20 @@ namespace AuthLibrary
     {
         public static void AddKeyCloakServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<KeyCloakSettings>(configuration.GetSection("KeyCloakSettings"));
+            services
+                .Configure<KeyCloakSettings>(configuration.GetSection("KeyCloakSettings"))
+                .PostConfigure<KeyCloakSettings>(settings =>
+                {
+                    string[] configErrors = settings.ValidationErrors().ToArray();
+                    if (configErrors.Any())
+                    {
+                        string aggrErrors = string.Join(",", configErrors);
+                        int count = configErrors.Length;
+                        string configType = settings.GetType().Name;
+                        throw new ApplicationException(
+                            $"Found {count} configuration error(s) in {configType}: {aggrErrors}");
+                    }
+                });
             services.AddTransient<IAuthService, KeyCloakService>();
         }
         public static void AddIdentityServerServices(this IServiceCollection services, IConfiguration configuration)

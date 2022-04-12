@@ -2,6 +2,6 @@
 {
     public class UserPermissionsRequest
     {
-        public string AccessToken { get; set; }
+
     }
 }

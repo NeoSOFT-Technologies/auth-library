@@ -54,10 +54,10 @@ namespace AuthLibrary.Services
             return responseObject;
         }
 
-        public async Task<AuthorizeResponse> AuthorizeAsync(AuthorizeRequest request)
+        public async Task<AuthorizeResponse> AuthorizeAsync(AuthorizeRequest request, string accessToken)
         {
             _logger.LogInformation("AuthorizeAsync Initiated");
-            Dictionary<string, string> headers = SetAuthorizationHeader(request.AccessToken);
+            Dictionary<string, string> headers = SetAuthorizationHeader(accessToken);
             KeyValuePair<string, string>[] requestBody = new KeyValuePair<string, string>[]
                 {
                     new KeyValuePair<string, string>("grant_type", "urn:ietf:params:oauth:grant-type:uma-ticket"),
@@ -80,10 +80,10 @@ namespace AuthLibrary.Services
             return responseObject;
         }
 
-        public async Task<UserPermissionsResponse> GetUserPermissionsAsync(UserPermissionsRequest request)
+        public async Task<UserPermissionsResponse> GetUserPermissionsAsync(UserPermissionsRequest request, string accessToken)
         {
             _logger.LogInformation("GetUserPermissionsAsync Initiated");
-            Dictionary<string, string> headers = SetAuthorizationHeader(request.AccessToken);
+            Dictionary<string, string> headers = SetAuthorizationHeader(accessToken);
             KeyValuePair<string, string>[] requestBody = new KeyValuePair<string, string>[]
                 {
                     new KeyValuePair<string, string>("grant_type", "urn:ietf:params:oauth:grant-type:uma-ticket"),

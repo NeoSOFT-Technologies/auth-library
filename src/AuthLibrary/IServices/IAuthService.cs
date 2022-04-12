@@ -7,7 +7,7 @@ namespace AuthLibrary.IServices
     public interface IAuthService
     {
         Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest request);
-        Task<AuthorizeResponse> AuthorizeAsync(AuthorizeRequest request);
-        Task<UserPermissionsResponse> GetUserPermissionsAsync(UserPermissionsRequest request);
+        Task<AuthorizeResponse> AuthorizeAsync(AuthorizeRequest request, string accessToken);
+        Task<UserPermissionsResponse> GetUserPermissionsAsync(UserPermissionsRequest request, string accessToken);
     }
 }
