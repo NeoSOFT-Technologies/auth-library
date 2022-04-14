@@ -32,6 +32,10 @@ namespace AuthLibrary.Helpers
 			{
 				foreach (KeyValuePair<string, string> header in headers)
 				{
+					if (httpClient.DefaultRequestHeaders.Contains(header.Key))
+                    {
+						httpClient.DefaultRequestHeaders.Remove(header.Key);
+					}
 					httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
 				}
 			}
