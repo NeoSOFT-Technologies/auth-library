@@ -36,28 +36,40 @@ namespace AuthApi.Controllers
         public async Task<IActionResult> Authorize(AuthorizeRequest request)
         {
             _logger.LogInformation("Authorization Initiated");
-            AuthorizeResponse response = await _authService.AuthorizeAsync(request);
-            if (!response.IsAuthorized)
+            if (Request.Headers.ContainsKey("Authorization"))
             {
-                _logger.LogError($"Authorization Failed with {response.Message}");
-                return StatusCode(403, response);
+                string accessToken = Request.Headers["Authorization"].ToString().Substring("Bearer ".Length);
+                AuthorizeResponse response = await _authService.AuthorizeAsync(request, accessToken);
+                if (!response.IsAuthorized)
+                {
+                    _logger.LogError($"Authorization Failed with {response.Message}");
+                    return StatusCode(403, response);
+                }
+                _logger.LogInformation("Authorization Successful");
+                return Ok(response);
             }
-            _logger.LogInformation("Authorization Successful");
-            return Ok(response);
+            _logger.LogError("Authorization Header Missing");
+            return Unauthorized("Authorization Header Missing");
         }
 
         [HttpPost]
         public async Task<IActionResult> GetUserPermissions(UserPermissionsRequest request)
         {
             _logger.LogInformation("GetUserPermissions Initiated");
-            UserPermissionsResponse response = await _authService.GetUserPermissionsAsync(request);
-            if (!response.IsAuthorized)
+            if (Request.Headers.ContainsKey("Authorization"))
             {
-                _logger.LogError($"GetUserPermissions Failed with {response.Message}");
-                return Unauthorized(response);
+                string accessToken = Request.Headers["Authorization"].ToString().Substring("Bearer ".Length);
+                UserPermissionsResponse response = await _authService.GetUserPermissionsAsync(request, accessToken);
+                if (!response.IsAuthorized)
+                {
+                    _logger.LogError($"GetUserPermissions Failed with {response.Message}");
+                    return Unauthorized(response);
+                }
+                _logger.LogError("GetUserPermissions completed with {@UserPermissionsResponse}", response);
+                return Ok(response);
             }
-            _logger.LogError("GetUserPermissions completed with {@UserPermissionsResponse}", response);
-            return Ok(response);
+            _logger.LogError("Authorization Header Missing");
+            return Unauthorized("Authorization Header Missing");
         }
     }
 }

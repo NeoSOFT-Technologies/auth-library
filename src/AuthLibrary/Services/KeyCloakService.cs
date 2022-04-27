@@ -8,6 +8,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Net.Http;
 
 namespace AuthLibrary.Services
 {
@@ -16,12 +19,14 @@ namespace AuthLibrary.Services
         private readonly KeyCloakSettings _keyCloakSettings;
         private readonly RestClient _restClient;
         private readonly ILogger<KeyCloakService> _logger;
+        private readonly ICacheService _cacheService;
 
-        public KeyCloakService(IOptions<KeyCloakSettings> keyCloakSettings, ILogger<KeyCloakService> logger)
+        public KeyCloakService(IOptions<KeyCloakSettings> keyCloakSettings, ILogger<KeyCloakService> logger, ICacheService cacheService)
         {
             _keyCloakSettings = keyCloakSettings.Value;
             _restClient = new RestClient(_keyCloakSettings.Host, _keyCloakSettings.TokenEndpoint);
             _logger = logger;
+            _cacheService = cacheService;
         }
 
         public async Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest request)
@@ -51,10 +56,10 @@ namespace AuthLibrary.Services
             return responseObject;
         }
 
-        public async Task<AuthorizeResponse> AuthorizeAsync(AuthorizeRequest request)
+        public async Task<AuthorizeResponse> AuthorizeAsync(AuthorizeRequest request, string accessToken)
         {
             _logger.LogInformation("AuthorizeAsync Initiated");
-            Dictionary<string, string> headers = SetAuthorizationHeader(request.AccessToken);
+            Dictionary<string, string> headers = SetAuthorizationHeader(accessToken);
             KeyValuePair<string, string>[] requestBody = new KeyValuePair<string, string>[]
                 {
                     new KeyValuePair<string, string>("grant_type", "urn:ietf:params:oauth:grant-type:uma-ticket"),
@@ -77,27 +82,40 @@ namespace AuthLibrary.Services
             return responseObject;
         }
 
-        public async Task<UserPermissionsResponse> GetUserPermissionsAsync(UserPermissionsRequest request)
+        public async Task<UserPermissionsResponse> GetUserPermissionsAsync(UserPermissionsRequest request, string accessToken)
         {
             _logger.LogInformation("GetUserPermissionsAsync Initiated");
-            Dictionary<string, string> headers = SetAuthorizationHeader(request.AccessToken);
-            KeyValuePair<string, string>[] requestBody = new KeyValuePair<string, string>[]
-                {
+            UserPermissionsResponse responseObject = new UserPermissionsResponse();
+            string cacheKey = accessToken;
+            if (!_cacheService.TryGet(cacheKey, out List<UserPermission> cachedList))
+            {
+                _logger.LogInformation("UserPermissions not found in cache");
+                Dictionary<string, string> headers = SetAuthorizationHeader(accessToken);
+                KeyValuePair<string, string>[] requestBody = new KeyValuePair<string, string>[]
+                    {
                     new KeyValuePair<string, string>("grant_type", "urn:ietf:params:oauth:grant-type:uma-ticket"),
                     new KeyValuePair<string, string>("response_mode", "permissions"),
                     new KeyValuePair<string, string>("audience", _keyCloakSettings.ClientId)
-                };
-            HttpResponseMessage response = await _restClient.PostAsync(requestBody, headers);
-            string responseString = await response.Content.ReadAsStringAsync();
-            UserPermissionsResponse responseObject = new UserPermissionsResponse();
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                responseObject.IsAuthorized = false;
-                responseObject.Message = JObject.Parse(responseString)["error_description"].ToString();
-                _logger.LogError($"GetUserPermissionsAsync Failed with {responseObject.Message}");
-                return responseObject;
+                    };
+                HttpResponseMessage response = await _restClient.PostAsync(requestBody, headers);
+                string responseString = await response.Content.ReadAsStringAsync();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    responseObject.IsAuthorized = false;
+                    responseObject.Message = JObject.Parse(responseString)["error_description"].ToString();
+                    _logger.LogError($"GetUserPermissionsAsync Failed with {responseObject.Message}");
+                    return responseObject;
+                }
+                responseObject.Permissions = JsonConvert.DeserializeObject<List<UserPermission>>(responseString);
+                cachedList = responseObject.Permissions;
+                _cacheService.Set(cacheKey, cachedList);
             }
-            responseObject.Permissions = JsonConvert.DeserializeObject<List<UserPermission>>(responseString);
+            else
+            {
+                _logger.LogInformation("UserPermissions found in cache");
+                responseObject.Permissions = cachedList;
+            }
             responseObject.IsAuthorized = true;
             _logger.LogError("GetUserPermissionsAsync completed with {@UserPermissionsResponse}", responseObject);
             return responseObject;

@@ -1,6 +1,8 @@
 ﻿using AuthLibrary.IServices;
 using AuthLibrary.Models.Request;
 using AuthLibrary.Models.Response;
+using System;
+using System.Threading.Tasks;
 
 namespace AuthLibrary.Services
 {
@@ -11,12 +13,12 @@ namespace AuthLibrary.Services
             throw new NotImplementedException();
         }
 
-        public Task<AuthorizeResponse> AuthorizeAsync(AuthorizeRequest request)
+        public Task<AuthorizeResponse> AuthorizeAsync(AuthorizeRequest request, string accessToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task<UserPermissionsResponse> GetUserPermissionsAsync(UserPermissionsRequest request)
+        public Task<UserPermissionsResponse> GetUserPermissionsAsync(UserPermissionsRequest request, string accessToken)
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,9 @@
-﻿namespace AuthLibrary.Helpers
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+namespace AuthLibrary.Helpers
 {
 	public class RestClient : IDisposable
 	{
@@ -23,10 +28,14 @@
 
 		public async Task<HttpResponseMessage> PostAsync(KeyValuePair<string, string>[] requestBody, Dictionary<string, string> headers = null)
 		{
-			if (headers is not null)
+			if (headers != null)
 			{
 				foreach (KeyValuePair<string, string> header in headers)
 				{
+					if (httpClient.DefaultRequestHeaders.Contains(header.Key))
+                    {
+						httpClient.DefaultRequestHeaders.Remove(header.Key);
+					}
 					httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
 				}
 			}
